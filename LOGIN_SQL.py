@@ -1,7 +1,7 @@
 
 from flask import Flask, request, jsonify
 from flask_mysqldb import MySQL
-
+from werkzeug.security import generate_password_hash,check_password_hash
 
 app = Flask(__name__)
 
@@ -22,11 +22,11 @@ def login():
 
     # 验证用户
     cursor = mysql.connection.cursor()
-    cursor.execute("SELECT * FROM users WHERE username = %s and password = %s", (username,password))
+    cursor.execute("SELECT * FROM users WHERE username = %s ", (username,))
     user = cursor.fetchone()
     cursor.close()
 
-    if user :
+    if user and check_password_hash(user[2],password) :
         return jsonify({'message': 'Login successful'}), 200
     else:
         return jsonify({'message': 'Invalid username or password'}), 401
@@ -47,11 +47,12 @@ def register():
     if existing_user:
         return jsonify({'message': 'Username already exists'}), 400
 
-
+    #密码加密
+    hashed_password = generate_password_hash(password)
 
     # 创建新用户
     cursor = mysql.connection.cursor()
-    cursor.execute("INSERT INTO users (username, password) VALUES (%s, %s)", (username, password))
+    cursor.execute("INSERT INTO users (username, password) VALUES (%s, %s)", (username, hashed_password))
     mysql.connection.commit()
     cursor.close()
 
