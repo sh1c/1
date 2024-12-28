@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>test</title>
+</head>
+<body>
+    <div class="storeFrame">
+        <div class="title">XXX商城 </div>
+        <div class="store_find">
+            <input class="input_find" type="text" placeholder="输入要增加的商品">
+            <div class="button_find">添加</div>
+        </div>
+        <div class="item itemcomplete">
+            <div>
+                <input type="checkbox">
+                <span class="name">商品1 </span>  
+            </div>
+            <div class="delete">delete</div>
+        </div>
+        <div class="item ">
+            <div>
+                <input type="checkbox">
+                <span class="name">商品2 </span>  
+            </div>
+            <div class="delete">delete</div>
+        </div>
+        <div class="item ">
+            <div>
+                <input type="checkbox">
+                <span class="name">商品3 </span>  
+            </div>
+            <div class="delete">delete</div>
+        </div>
+
+    </div>
+
+<style>
+    
+    body{
+        /* 网页背景颜色设置 */
+        background: linear-gradient(to right, rgb(0, 217, 255), rgb(0, 128, 87));
+        
+    }
+    .storeFrame{
+        /* 总界面设置 */
+
+        /* 外边距 */
+        margin-top: 100px;  
+        /* 内边距 */
+        padding-top: 30px;
+
+        margin-left: 1%;
+        width: 98%;
+        height: 700px;
+        background-color: white;
+        border-radius: 10px;
+        box-sizing: border-box;
+    }
+    .title{
+        font-size: 40px;
+        font-weight: 700;
+        text-align: center;
+    }
+    .store_find{
+        display: flex;
+        padding-left: 20px;
+        padding-top: 20px;
+    }
+    .input_find{
+        padding-left: 10px;
+        width: 30%;
+        height: 50px;
+        /* outline:none; */
+        border-radius: 20px 0 0 20px;
+        border: 1px color(srgb red green blue);
+    }
+    .button_find{
+        text-align: center;
+        color: white;
+        line-height: 55px;
+        width: 100px;
+        height: 55px;
+        border-radius: 0 20px 20px 0;
+        background: linear-gradient(to right, rgb(0, 217, 255), rgb(0, 128, 87));
+        cursor: pointer;
+        user-select: none;
+
+    }
+    .item{
+        margin: 40px auto;
+        padding: 10px;
+        width: 30%; 
+        border: 2px solid black; 
+        box-shadow: 10px 10px 5px 2px rgba(0, 0, 0, 0.2);
+        border-radius: 30px 30px 30px 30px;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        user-select: none;
+    }
+    .itemcomplete{
+        text-decoration: line-through;
+        opacity: 0.4;
+    }
+    .delete{
+        user-select: none;
+        color: red;
+    }
+</style>
+
+</body>
+</html>
