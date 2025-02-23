@@ -1,10 +1,12 @@
 
-from flask import Flask, request, jsonify,session,render_template
+from flask import Flask, request, jsonify,render_template
 from flask_mysqldb import MySQL
 from werkzeug.security import generate_password_hash,check_password_hash
+import jwt,datetime
+from functools import wraps
 
 app = Flask(__name__)
-app.secret_key = "123456"
+#app.config['SECRET_KEY'] = '123456' 目前不知道咋用-------------------------------
 # 配置MySQL数据库连接
 app.config['MYSQL_HOST'] = 'localhost'
 app.config['MYSQL_USER'] = 'root'
@@ -12,6 +14,9 @@ app.config['MYSQL_PASSWORD'] = '123456'
 app.config['MYSQL_DB'] = 'mydatabase'
 
 mysql = MySQL(app)
+
+#Token 密钥
+secret_key = "dingtinayi"
 
 # 注册API
 @app.route('/register', methods=['POST'])
@@ -47,26 +52,56 @@ def login():
     username = data['username']
     password = data['password']
 
+
     # 验证用户
     cursor = mysql.connection.cursor()
     cursor.execute("SELECT * FROM users WHERE username = %s ", (username,))
     user = cursor.fetchone()
     cursor.close()
 
+    
     if user and check_password_hash(user[2],password) :
-        session["username"]=username
-        return jsonify({'message': 'Login successful'}), 200
+        # Token的创建
+        token = jwt.encode({
+            "name":username,
+            "exp":datetime.datetime.utcnow()+datetime.timedelta(minutes=30)},
+            secret_key,algorithm="HS256")
+
+        return jsonify({'message': 'Login successful',"token":token}), 200
     else:
-        session.clear()
         return jsonify({'message': 'Invalid username or password'}), 401
 
 
 #商城页面API
 @app.route("/storeMenu",methods=['GET'])
 def menu():
-    if "username" in session and session["username"] is not None:
-        return render_template("store.html")
-    else:
-        return render_template("404.html")
+    token = request.headers.get("Authorization")
+
+    if not token:
+        return jsonify("Token is missing"),401
+    try:
+        token = token.split(" ")[1]
+        data = jwt.decode(token,secret_key,algorithms=["HS256"])
+        username = data["name"]
+        #连接数据库
+        cursor = mysql.connection.cursor()
+        cursor.execute("SELECT * FROM users WHERE username = %s", (username,))
+        user = cursor.fetchone()
+        cursor.close()
+
+
+        if not user:
+            return jsonify({"message":"Token is invalid"}),401
+        
+        return render_template("store.html"),200
+    except jwt.ExpiredSignatureError:
+         return jsonify({"message": "Token has expired"}), 401
+    except jwt.InvalidTokenError:
+        return jsonify({"message": "Invalid token"}), 401
+            
+
+
+        
+    
 if __name__ == '__main__':
     app.run(debug=True)
