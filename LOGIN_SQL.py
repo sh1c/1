@@ -61,7 +61,7 @@ def login():
 
     
     if user and check_password_hash(user[2],password) :
-        # Token的创建
+        # Token的创建(有效的token)
         token = jwt.encode({
             "name":username,
             "exp":datetime.datetime.utcnow()+datetime.timedelta(minutes=30)},
@@ -69,7 +69,11 @@ def login():
 
         return jsonify({'message': 'Login successful',"token":token}), 200
     else:
-        return jsonify({'message': 'Invalid username or password'}), 401
+        # Token的创建(无效的token)防止登录错误的用户使用未过期的token访问商城界面
+        token = jwt.encode({
+            "exp":datetime.datetime.utcnow()+datetime.timedelta(minutes=30)
+        },secret_key,algorithm="HS256")
+        return jsonify({'message': 'Invalid username or password',"token":token}), 401
 
 
 #商城页面API
@@ -82,14 +86,14 @@ def menu():
     try:
         token = token.split(" ")[1]
         data = jwt.decode(token,secret_key,algorithms=["HS256"])
-        username = data["name"]
+        username = data.get("name")
         #连接数据库
         cursor = mysql.connection.cursor()
         cursor.execute("SELECT * FROM users WHERE username = %s", (username,))
         user = cursor.fetchone()
         cursor.close()
 
-
+        #检测token是否有效
         if not user:
             return jsonify({"message":"Token is invalid"}),401
         
